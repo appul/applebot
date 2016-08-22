@@ -1,4 +1,3 @@
-import inspect
 import logging
 
 import discord
@@ -48,9 +47,8 @@ class CommandModule(BotModule):
 
 
 class CommandManager(EventManager):
-    def __init__(self, *, client=None):
+    def __init__(self):
         super().__init__()
-        self.__dict__['client'] = client or inspect.currentframe().f_back.f_locals['self'].client
         self.__dict__['_event_type'] = Command
 
 

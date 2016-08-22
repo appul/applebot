@@ -1,7 +1,8 @@
-import inspect
 import logging
 
 import discord
+
+from utils import caller_attr
 
 log = logging.getLogger(__name__)
 
@@ -9,7 +10,7 @@ log = logging.getLogger(__name__)
 class BotModule(object):
     def __init__(self, client=None):
         self.__name__ = None
-        self.client = client or inspect.currentframe().f_back.f_back.f_locals['self'].client or discord.Client()
+        self.client = client or caller_attr('client') or discord.Client()
         self.__register_handlers()
 
     def __register_handlers(self):
