@@ -4,8 +4,8 @@ from enum import Enum, IntEnum
 
 from discord import PrivateChannel, Role, User, Message, Server, Channel, Member
 
-from command import Command
-from exceptions import BlockCommandException
+from applebot.command import Command
+from applebot.exceptions import BlockCommandException
 
 
 class EVENTTYPE(IntEnum):

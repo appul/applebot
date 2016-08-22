@@ -9,7 +9,7 @@ from applebot.command import CommandManager, CommandModule
 from applebot.config import Config
 from applebot.enums import EVENT
 from applebot.modules.logmodule import LogModule
-from utils import call_co
+from applebot.utils import call_co
 
 MAX_LOG_SIZE_BYTES = 1024 * 1024
 LOG_BACKUP_COUNT = 2
