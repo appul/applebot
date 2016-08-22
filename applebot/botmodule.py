@@ -2,7 +2,7 @@ import logging
 
 import discord
 
-from utils import caller_attr
+from applebot.utils import caller_attr
 
 log = logging.getLogger(__name__)
 
