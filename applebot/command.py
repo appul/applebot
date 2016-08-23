@@ -16,6 +16,7 @@ class CommandModule(BotModule):
     @BotModule.event('message')
     async def parse_message(self, message):
         assert isinstance(message, discord.Message)
+        if message.author.bot: return
         if message.content[:1] != self.client.config.command_prefix: return
         command_name = message.content[1:].split(' ')[0]
         command = self.client.commands.get(command_name)
