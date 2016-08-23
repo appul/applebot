@@ -23,7 +23,7 @@ class Bot(discord.Client):
     def __init__(self, *, config=None, **options):
         super().__init__(**options)
         self.client = self
-        self.config = Config(config)
+        self.config = BotConfig(config)
         self.events = EventManager()
         self.commands = CommandManager()
         self._bot_modules = {}
@@ -120,3 +120,14 @@ class Bot(discord.Client):
                 return result
 
         return wrapped_method
+
+
+class BotConfig(Config):
+    def __init__(self, *args, **kwargs):
+        self.debug = False
+        self.command_prefix = '!'
+        self.username = None
+        self.password = None
+        self.token = None
+        self.owner = 0
+        super().__init__(*args, **kwargs)

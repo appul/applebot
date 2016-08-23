@@ -8,12 +8,6 @@ log = logging.getLogger(__name__)
 
 class Config(object):
     def __init__(self, config=None):
-        self.debug = False
-        self.command_prefix = '!'
-        self.username = None
-        self.password = None
-        self.token = None
-        self.owner = 0
         if config:
             self.load(config)
 
