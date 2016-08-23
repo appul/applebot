@@ -70,6 +70,7 @@ class Bot(discord.Client):
         return method_decorator
 
     async def on_error(self, *args, **kwargs):
+        log.error(*args, **kwargs)
         await self.events.emit('error', *args, **kwargs)
         await super().on_error(*args, **kwargs)
 
