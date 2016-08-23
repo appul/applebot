@@ -11,10 +11,18 @@ class Config(object):
         if config:
             self.load(config)
 
+    def sub(self, name, config_type=None, default_value=None):
+        """Create a subconfig from the config, for nested configs."""
+        config_type = config_type or self.__class__
+        self.__dict__[name] = config_type(self.__dict__.get(name, default_value))
+        return self.__dict__[name]
+
     def update(self, config):
+        """Update config dict with new values."""
         self.__dict__.update(config)
 
     def load(self, config):
+        """Load a config from a file, dict or other Config."""
         if isinstance(config, str):
             return self.load_file(config)
         elif isinstance(config, dict):
@@ -24,6 +32,7 @@ class Config(object):
         raise TypeError('Parameter \'config\' must be of type str, dict or Config')
 
     def load_file(self, config):
+        """Load a config from a file."""
         path, folder, file = self._find_config(config)
         if not path:
             raise FileNotFoundError('Could not find config file: {}'.format(config))
@@ -37,12 +46,12 @@ class Config(object):
     @staticmethod
     def _find_config(config):
         main_dir = os.path.dirname(os.path.realpath(sys.modules['__main__'].__file__))
-        config_dir = os.path.join(main_dir, 'config')
+        cnfg_dir = os.path.join(main_dir, 'config')
         user_dir = os.path.expanduser('~')
 
         def search_paths():
             yield '', config
-            for dir_ in [main_dir, config_dir, user_dir]:
+            for dir_ in [main_dir, cnfg_dir, user_dir]:
                 for name_ in ['{}.applebot', '{}.config', '{}.json', '{}.config.json']:
                     yield dir_, name_.format(config)
 
