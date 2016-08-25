@@ -16,11 +16,11 @@ class BotModule(object):
     def __register_handlers(self):
         for method in [getattr(self, m) for m in dir(self) if '__' not in m]:
             if callable(method):
-                command = method.__dict__.get('command_name')
+                commands = method.__dict__.get('command_names')
                 event = method.__dict__.get('event_name')
-                if command:
-                    log.debug('Adding command \'{}\' in {}'.format(command, self.__class__.__name__))
-                    for command in (command if isinstance(command, (tuple, list)) else (command,)):
+                if commands:
+                    for command in commands:
+                        log.debug('Adding command \'{}\' in {}'.format(commands, self.__class__.__name__))
                         self.client.commands.add(str(command), method)
                 if event:
                     log.debug('Registering event \'{}\' from {}'.format(event, self.__class__.__name__))
@@ -35,9 +35,9 @@ class BotModule(object):
         return inner_decorator
 
     @staticmethod
-    def command(command):
+    def command(*commands):
         def inner_decorator(method):
-            method.command_name = command
+            method.command_names = commands
             return method
 
         return inner_decorator
