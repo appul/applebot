@@ -46,6 +46,16 @@ class CommandModule(BotModule):
             log.debug('Command blocked, reason: not allowed in public channels')
             raise BlockCommandException('not allowed in public')
 
+    @BotModule.command('help')
+    async def on_help_command(self, message):
+        """!help <command> | Get help for a command."""
+        assert isinstance(message, discord.Message)
+        command_arg = message.content[6:]
+        command_help = self.client.commands.get(command_arg).help
+        if command_help is None:
+            return await self.client.send_message(message.channel, 'Could not find help for command `{}`'.format(command_arg))
+        return await self.client.send_message(message.channel, 'Help for command `{}`:\n{}'.format(command_arg, command_help))
+
 
 class CommandManager(EventManager):
     def __init__(self):
@@ -56,10 +66,17 @@ class CommandManager(EventManager):
 class Command(Event):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.public = True
-        self.private = True
+        self.public = True  # type: bool
+        self.private = True  # type: bool
         self._handler_type = Callback
         self._combined_type = CombinedCommand
+
+    @property
+    def help(self):
+        handler_helps = [h.help for h in self if h.help is not None]
+        if handler_helps:
+            return '\n'.join(handler_helps)
+        return None
 
 
 class CombinedCommand(CombinedEvent):
@@ -67,4 +84,6 @@ class CombinedCommand(CombinedEvent):
 
 
 class Callback(EventHandler):
-    pass
+    @property
+    def help(self):
+        return self.handler.__doc__
