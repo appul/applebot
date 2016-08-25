@@ -48,7 +48,7 @@ class CommandModule(BotModule):
 
     @BotModule.command('help')
     async def on_help_command(self, message):
-        """!help <command> | Get help for a command."""
+        """`!help <command>` | Get help for a command."""
         assert isinstance(message, discord.Message)
         command_arg = message.content[6:]
         command_help = self.client.commands.get(command_arg).help
