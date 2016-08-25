@@ -68,12 +68,16 @@ class LogModule(BotModule):
 
     @BotModule.event('message')
     async def on_message(self, message):
-        msg_log.info('[Ch: {0.channel.name}] {0.author.name}: {0.content}'.format(message))
+        msg_log.info('[Ch: {0.channel.name}] [+] {0.author.name}: {0.content}'.format(message))
+
+    @BotModule.event('message_delete')
+    async def on_message_delete(self, message):
+        msg_log.info('[Ch: {0.channel.name}] [-] {0.author.name}: {0.content}'.format(message))
 
     @BotModule.event('message_edit')
     async def on_message_edit(self, before, after):
-        msg_log.info('[Ch: {0.channel.name}] {0.author.name}: {0.content}'.format(before))
-        msg_log.info('[Ch: {0.channel.name}] {0.author.name}: {0.content}'.format(after))
+        msg_log.info('[Ch: {0.channel.name}] [-] {0.author.name}: {0.content}'.format(before))
+        msg_log.info('[Ch: {0.channel.name}] [+] {0.author.name}: {0.content}'.format(after))
 
     @BotModule.event('command_received')
     async def on_command_received(self, message, command):
