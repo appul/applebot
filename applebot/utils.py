@@ -22,13 +22,14 @@ def caller_attr(attr, default=None, levels=2):
 
 def table_align(lines, alignment=None):
     adjusts = {'r': str.rjust, 'l': str.ljust}
-
-    cols = transpose_list(lines)
     alignment = iter(alignment)
+    cols = transpose_list(lines)
+
     for i, col in enumerate(cols):
-        width = max(map(len, col))
         adjust = adjusts[next(alignment, 'l')]
+        width = max(map(len, col))
         cols[i] = [adjust(s, width) for s in col]
+
     return transpose_list(cols)
 
 
