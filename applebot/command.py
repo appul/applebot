@@ -100,7 +100,7 @@ class CommandManager(EventManager):
         self.__dict__['_event_type'] = Command
 
     def check(self, command, message):
-        config = self.configs.get(str(command)) or self.config.get('global')
+        config = self.configs.get(str(command)) or self.configs.get('global')
         if config:
             return config.check(message)
         return True
