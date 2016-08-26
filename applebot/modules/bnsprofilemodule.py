@@ -1,3 +1,4 @@
+import html
 import re
 import time
 import urllib.parse
@@ -94,6 +95,7 @@ class BnsProfile(object):
         self.server = desc.eq(2).text()
         self.level = int(re.findall(r'\d+', desc.eq(1).text())[0])
         self.mastery = int(re.findall(r'\d+', self._body('span.masteryLv').text())[0])
+        self.faction = html.unescape(desc.eq(3).text())
 
         for stat_ele in self._body('dt.stat-title').items():
             stat = BnsProfileStat.parse(stat_ele)
