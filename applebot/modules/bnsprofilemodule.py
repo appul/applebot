@@ -1,5 +1,6 @@
 import re
 import time
+import urllib.parse
 from collections import UserDict
 from typing import Dict
 from typing import Union
@@ -9,7 +10,7 @@ import discord
 from pyquery import PyQuery
 
 from applebot.botmodule import BotModule
-from applebot.utils import get_request, table_align
+from applebot.utils import table_align
 
 PROFILE_URL = 'http://{region}-bns.ncsoft.com/ingame/bs/character/profile?c={name}'
 
@@ -62,13 +63,13 @@ class BnsProfileRequest(object):
         self.response = None  # type: aiohttp.Response
 
     async def send(self):
-        self.response = await get_request(self._request_url, session=self._session)
-        self.profile.parse(self.response)
-        return self.profile
+        async with self._session.get(self._request_url) as response:
+            self.profile.parse(await response.text())
+            return self.profile
 
     @property
     def _request_url(self):
-        return PROFILE_URL.format(name=self.profile_name, region=self.region)
+        return PROFILE_URL.format(name=urllib.parse.quote_plus(self.profile_name), region=self.region)
 
 
 class BnsProfile(object):
@@ -84,13 +85,13 @@ class BnsProfile(object):
         self.stats = {}  # type: Dict[str, BnsProfileStat]
 
     def parse(self, response):
-        self._body = PyQuery(response.body)
+        self._body = PyQuery(response)
         self.name = self._body('span.name').text().strip('[]')
         self.clan = self._body('li.guild').text()
+
         desc = self._body('dd.desc')('li')
         self.job = desc.eq(0).text()
         self.server = desc.eq(2).text()
-        print(desc.eq(1).html())
         self.level = int(re.findall(r'\d+', desc.eq(1).text())[0])
         self.mastery = int(re.findall(r'\d+', self._body('span.masteryLv').text())[0])
 
