@@ -1,6 +1,8 @@
 import asyncio
 import inspect
 
+import aiohttp
+
 
 def call_co(co, *args, **kwargs):
     """Call a coroutine as a function. Not thread safe!"""
@@ -35,3 +37,10 @@ def table_align(lines, alignment=None):
 
 def transpose_list(matrix):
     return list(zip(*matrix))
+
+
+async def get_request(*args, session=None, **kwargs):
+    session = session or aiohttp.ClientSession()
+    async with session.get(*args, **kwargs) as response:
+        response.body = await response.text()
+        return response
