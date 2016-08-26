@@ -101,9 +101,9 @@ class Event(object):
         self._combined_type = CombinedEvent
         self.__signature__ = None
 
-    async def __call__(self, *args, **kwargs):
+    def __call__(self, *args, **kwargs):
         """Emit and call the handlers of the event."""
-        return await self.emit(*args, **kwargs)
+        return self.emit(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -241,9 +241,9 @@ class EventHandler(object):
         self.call_limit = call_limit
         self.handler = handler
 
-    async def __call__(self, *args, **kwargs):
+    def __call__(self, *args, **kwargs):
         """Call the handler."""
-        return await self.call(*args, **kwargs)
+        return self.call(*args, **kwargs)
 
     def __hash__(self):
         """Get a hash by hashing the handler."""
