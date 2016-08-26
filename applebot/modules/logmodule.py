@@ -85,11 +85,11 @@ class LogModule(BotModule):
 
     @BotModule.event('command_finished')
     async def on_command_finished(self, message, command):
-        cmd_log.log(27, '[Ch: {0.channel.name}] {0.author.name}: {1.name}'.format(message, command))
+        cmd_log.log(27, '[Ch: {0.channel.name}] {0.author.name}: {1}'.format(message, command))
 
     @BotModule.event('command_notfound')
     async def on_command_notfound(self, message, command):
-        cmd_log.log(28, '[Ch: {0.channel.name}] {0.author.name}: {1.name}'.format(message, command))
+        cmd_log.log(28, '[Ch: {0.channel.name}] {0.author.name}: {1}'.format(message, command))
 
     @BotModule.event('command_blocked')
     async def on_command_blocked(self, message, command, e):

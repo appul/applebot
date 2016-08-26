@@ -30,9 +30,9 @@ class CommandModule(BotModule):
         command_name = message.content[1:].split(' ')[0]
         command = self.client.commands.get(command_name)
         log.debug('Received command: {}'.format(command_name))
-        await self.emit_command(command, message)
+        await self.emit_command(command, message, command_name)
 
-    async def emit_command(self, command, message):
+    async def emit_command(self, command, message, command_name):
         if command:
             try: await self.client.events.emit('command_received', message, command)
             except BlockCommandException as e:
@@ -40,8 +40,8 @@ class CommandModule(BotModule):
             else: await command.emit(message)
         else:
             log.debug('Command not registered')
-            await self.client.events.emit('command_notfound', message, command)
-        await self.client.events.emit('command_finished', message, command)
+            await self.client.events.emit('command_notfound', message, command_name)
+        await self.client.events.emit('command_finished', message, command or command_name)
 
     @BotModule.event('command_received')
     async def on_command_receive(self, message, command):
