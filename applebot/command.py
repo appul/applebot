@@ -1,9 +1,12 @@
 import logging
+from typing import Dict
+from typing import Union
 
 import discord
 
 from applebot.asyncevents import EventManager, Event, EventHandler, CombinedEvent
 from applebot.botmodule import BotModule
+from applebot.config import Config
 from applebot.exceptions import BlockCommandException
 
 log = logging.getLogger(__name__)
@@ -12,6 +15,12 @@ log = logging.getLogger(__name__)
 class CommandModule(BotModule):
     def __init__(self):
         super().__init__()
+        self._setup_configs()
+
+    def _setup_configs(self):
+        configs = self.client.config.get('commands', {})
+        for name, config in configs.items():
+            self.client.commands.configs[name] = CommandConfig(config)
 
     @BotModule.event('message')
     async def parse_message(self, message):
@@ -36,38 +45,70 @@ class CommandModule(BotModule):
 
     @BotModule.event('command_received')
     async def on_command_receive(self, message, command):
-        if message.author.id == self.client.config.owner: return
-
-        if not command.private and message.channel.is_private:
-            log.debug('Command blocked, reason: not allowed in private channels')
-            raise BlockCommandException('not allowed in private')
-
-        if not command.public and not message.channel.is_private:
-            log.debug('Command blocked, reason: not allowed in public channels')
-            raise BlockCommandException('not allowed in public')
+        # if message.author.id == self.client.config.owner: return
+        if not self.client.commands.check(command, message):
+            raise BlockCommandException('denied by command config')
 
     @BotModule.command('help')
     async def on_help_command(self, message):
         """`!help <command>` | Get help for a command."""
         assert isinstance(message, discord.Message)
-        command_arg = message.content[6:]
-        command_help = self.client.commands.get(command_arg).help
-        if command_help is None:
-            return await self.client.send_message(message.channel, 'Could not find help for command `{}`'.format(command_arg))
-        return await self.client.send_message(message.channel, 'Help for command `{}`:\n{}'.format(command_arg, command_help))
+        command_arg = message.content[6:] or 'help'
+        command = self.client.commands.get(command_arg)
+        if command is None:
+            return await self.client.send_message(message.channel, 'Command `{}` does not exist.'.format(command_arg))
+        if command.help is None:
+            return await self.client.send_message(message.channel, 'Help for command `{}` doesn\'t exist.'.format(command_arg))
+        return await self.client.send_message(message.channel, 'Help for command `{}`:\n{}'.format(command_arg, command.help))
+
+
+class CommandConfig(Config):
+    def __init__(self, config=None):
+        super().__init__()
+        self.allow = {}  # type: Dict[str, Union[str, int, dict, list]]
+        self.deny = {}  # type: Dict[str, Union[str, int, dict, list]]
+        if config is not None:
+            self.load(config)
+
+    def check(self, message):
+        def check(msg, cfg):
+            log.debug('Check: {}, {}'.format(msg, cfg))
+            if msg is None: return False
+            if cfg is True: return True
+            if isinstance(cfg, dict):
+                for key, var in cfg.items():
+                    obj = msg.get(key) if isinstance(msg, dict) else getattr(msg, key, None)
+                    if check(obj, var):
+                        return True
+            if isinstance(cfg, (str, str, bool)):
+                if str(msg) == str(cfg):
+                    return True
+            if isinstance(cfg, (list, tuple)):
+                if msg in cfg:
+                    return True
+            return False
+
+        allow = check(message, self.allow) if self.allow else True
+        deny = check(message, self.deny) if self.deny else False
+        return allow and not deny
 
 
 class CommandManager(EventManager):
     def __init__(self):
         super().__init__()
+        self.__dict__['configs'] = {}  # type: Dict[CommandConfig]
         self.__dict__['_event_type'] = Command
+
+    def check(self, command, message):
+        config = self.configs.get(str(command)) or self.config.get('global')
+        if config:
+            return config.check(message)
+        return True
 
 
 class Command(Event):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.public = True  # type: bool
-        self.private = True  # type: bool
         self._handler_type = Callback
         self._combined_type = CombinedCommand
 

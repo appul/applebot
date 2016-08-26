@@ -3,5 +3,14 @@
   "command_prefix": "!",
   "username": null,
   "password": null,
-  "token": null
+  "token": null,
+  "commands": {
+    "help": {
+      "allow": {
+        "author": {
+          "bot": "False"
+        }
+      }
+    }
+  }
 }
