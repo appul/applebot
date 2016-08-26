@@ -11,6 +11,9 @@ class Config(object):
         if config:
             self.load(config)
 
+    def get(self, key, default):
+        return self.__dict__.get(key, default)
+
     def sub(self, name, config_type=None, default_value=None):
         """Create a subconfig from the config, for nested configs."""
         config_type = config_type or self.__class__
