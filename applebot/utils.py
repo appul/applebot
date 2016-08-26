@@ -1,5 +1,6 @@
 import asyncio
 import inspect
+import itertools
 
 import aiohttp
 
@@ -24,19 +25,19 @@ def caller_attr(attr, default=None, levels=2):
 
 def table_align(lines, alignment=None):
     adjusts = {'r': str.rjust, 'l': str.ljust}
-    alignment = iter(alignment)
+    alignment = iter(alignment or [])
     cols = transpose_list(lines)
 
     for i, col in enumerate(cols):
         adjust = adjusts[next(alignment, 'l')]
-        width = max(map(len, col))
-        cols[i] = [adjust(s, width) for s in col]
+        width = max(map(lambda s: len(s) if s else 0, col))
+        cols[i] = [adjust(s, width) if s else '' for s in col]
 
     return transpose_list(cols)
 
 
 def transpose_list(matrix):
-    return list(zip(*matrix))
+    return list(itertools.zip_longest(*matrix))
 
 
 async def get_request(*args, session=None, **kwargs):
