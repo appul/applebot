@@ -26,7 +26,7 @@ class LogModule(BotModule):
         self.initialize()
 
     def initialize(self):
-        log_formatter = DecodedFormatter('%(asctime)s.%(msecs)03d [%(module)7s] [%(levelname)5s] %(message)s', '%H:%M:%S')
+        log_formatter = logging.Formatter('%(asctime)s.%(msecs)03d [%(module)7s] [%(levelname)5s] %(message)s', '%H:%M:%S')
 
         log_dir = os.path.join(os.path.dirname(os.path.realpath(sys.modules['__main__'].__file__)), 'log')
         if not os.path.exists(log_dir):
@@ -36,11 +36,11 @@ class LogModule(BotModule):
         cli_log.setFormatter(log_formatter)
         cli_log.setLevel(logging.DEBUG if self.client.config.debug else logging.INFO)
 
-        file_log = RotatingFileHandler(os.path.join(log_dir, 'log.log'), backupCount=LOG_BACKUP_COUNT, maxBytes=MAX_LOG_SIZE_BYTES)
+        file_log = RotatingFileHandler(os.path.join(log_dir, 'log.log'), backupCount=LOG_BACKUP_COUNT, maxBytes=MAX_LOG_SIZE_BYTES, encoding='utf-8')
         file_log.setFormatter(log_formatter)
         file_log.setLevel(logging.INFO)
 
-        debug_log = RotatingFileHandler(os.path.join(log_dir, 'debug.log'), backupCount=LOG_BACKUP_COUNT, maxBytes=MAX_LOG_SIZE_BYTES)
+        debug_log = RotatingFileHandler(os.path.join(log_dir, 'debug.log'), backupCount=LOG_BACKUP_COUNT, maxBytes=MAX_LOG_SIZE_BYTES, encoding='utf-8')
         debug_log.setFormatter(log_formatter)
         debug_log.setLevel(logging.DEBUG)
 
@@ -51,13 +51,13 @@ class LogModule(BotModule):
         root_log.setLevel(logging.DEBUG)
 
         messages_formatter = DecodedFormatter('%(asctime)s.%(msecs)03d %(message)s', '%H:%M:%S')
-        messages_log = RotatingFileHandler(os.path.join(log_dir, 'messages.log'), backupCount=LOG_BACKUP_COUNT, maxBytes=MAX_LOG_SIZE_BYTES)
+        messages_log = RotatingFileHandler(os.path.join(log_dir, 'messages.log'), backupCount=LOG_BACKUP_COUNT, maxBytes=MAX_LOG_SIZE_BYTES, encoding='utf-8')
         messages_log.setFormatter(messages_formatter)
         messages_log.setLevel(logging.INFO)
         msg_log.addHandler(messages_log)
 
         commands_formatter = DecodedFormatter('%(asctime)s.%(msecs)03d [%(levelname)5s] %(message)s', '%H:%M:%S')
-        commands_log = RotatingFileHandler(os.path.join(log_dir, 'commands.log'), backupCount=LOG_BACKUP_COUNT, maxBytes=MAX_LOG_SIZE_BYTES)
+        commands_log = RotatingFileHandler(os.path.join(log_dir, 'commands.log'), backupCount=LOG_BACKUP_COUNT, maxBytes=MAX_LOG_SIZE_BYTES, encoding='utf-8')
         commands_log.setFormatter(commands_formatter)
         commands_log.setLevel(logging.INFO)
         logging.addLevelName(26, 'Received')
