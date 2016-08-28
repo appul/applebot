@@ -1,8 +1,9 @@
 import inspect
 import logging
-
 from collections import OrderedDict
 from inspect import Signature
+
+from applebot.exceptions import EventNotFoundError
 
 log = logging.getLogger(__name__)
 
@@ -52,8 +53,9 @@ class EventManager(object):
 
     def add_handler(self, event, handler, call_limit=None):
         """Add a new or existing handler to a new or existing event."""
-        event = self.add_event(event)
-        return event.add(handler, call_limit)
+        if event not in self:
+            raise EventNotFoundError('Event \'{0}\' doesn\'t exist or hasn\'t been registered to this EventManager.')
+        return self.get(event).add(handler, call_limit)
 
 
 class Event(object):
