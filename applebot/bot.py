@@ -5,9 +5,9 @@ import discord
 
 from applebot.asyncevents import EventManager
 from applebot.botmodule import BotModule
-from applebot.command import CommandManager, CommandModule
 from applebot.config import Config
 from applebot.enums import EVENT
+from applebot.modules.commandmodule import CommandManager, CommandModule
 from applebot.modules.logmodule import LogModule
 from applebot.utils import call_co
 
