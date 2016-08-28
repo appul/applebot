@@ -96,7 +96,7 @@ class CommandConfig(Config):
 class CommandManager(EventManager):
     def __init__(self):
         super().__init__()
-        self.configs = {}  # type: Dict[CommandConfig]
+        self.configs = {}  # type: Dict[str, CommandConfig]
         self._event_type = Command
 
     def check(self, command, message):
@@ -113,8 +113,8 @@ class Command(Event):
         self._combined_type = CombinedCommand
 
     @property
-    def help(self):
-        handler_helps = [h.help for h in self if h.help is not None]
+    def help(self) -> str:
+        handler_helps = [str(h.handler.__doc__) for h in self if h.handler.__doc__ is not None]
         if handler_helps:
             return '\n'.join(handler_helps)
         return None

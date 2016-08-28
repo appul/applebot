@@ -63,7 +63,7 @@ class Event(object):
     def __init__(self, name):
         self.name = name  # type: str
         self.enabled = True  # type: bool
-        self._handlers = OrderedDict()  # type: OrderedDict
+        self._handlers = OrderedDict()  # type: OrderedDict[str, EventHandler]
         self._handler_type = EventHandler
         self._combined_type = CombinedEvent
 
@@ -176,7 +176,7 @@ class EventHandler(object):
         self._handler = None  # type: asyncio.coroutine
         self._enabled = True  # type: bool
         self.call_limit = call_limit  # type: int
-        self.handler = handler  # type: EventHandler
+        self.handler = handler  # type: asyncio.coroutine
 
     def __hash__(self):
         """Get a hash by hashing the handler."""
