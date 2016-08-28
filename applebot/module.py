@@ -7,7 +7,7 @@ from applebot.utils import caller_attr
 log = logging.getLogger(__name__)
 
 
-class BotModule(object):
+class Module(object):
     def __init__(self, client=None):
         self.__name__ = None
         self.client = client or caller_attr('client', levels=3) or discord.Client()

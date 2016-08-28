@@ -4,7 +4,7 @@ from asyncio import iscoroutinefunction
 import discord
 
 from applebot.events import EventManager
-from applebot.botmodule import BotModule
+from applebot.module import Module
 from applebot.config import Config
 from applebot.enums import EVENT
 from applebot.modules.commandmodule import CommandManager, CommandModule
@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 
 
 class Bot(discord.Client):
-    _module_base = BotModule  # Allow child classes to override the module base
+    _module_base = Module  # Allow child classes to override the module base
 
     def __init__(self, *, config=None, **options):
         super().__init__(**options)

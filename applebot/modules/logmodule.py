@@ -5,7 +5,7 @@ from logging.handlers import RotatingFileHandler
 
 from unidecode import unidecode
 
-from applebot.botmodule import BotModule
+from applebot.module import Module
 
 MAX_LOG_SIZE_BYTES = 1024 * 1024
 LOG_BACKUP_COUNT = 5
@@ -20,7 +20,7 @@ class DecodedFormatter(logging.Formatter):
         return unidecode(super().format(record))  # Remove unicode symbols
 
 
-class LogModule(BotModule):
+class LogModule(Module):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.initialize()
@@ -66,31 +66,31 @@ class LogModule(BotModule):
         logging.addLevelName(29, 'Blocked')
         cmd_log.addHandler(commands_log)
 
-    @BotModule.event('message')
+    @Module.event('message')
     async def on_message(self, message):
         msg_log.info('[Ch: {0.channel.name}] [+] {0.author.name}: {0.content}'.format(message))
 
-    @BotModule.event('message_delete')
+    @Module.event('message_delete')
     async def on_message_delete(self, message):
         msg_log.info('[Ch: {0.channel.name}] [-] {0.author.name}: {0.content}'.format(message))
 
-    @BotModule.event('message_edit')
+    @Module.event('message_edit')
     async def on_message_edit(self, before, after):
         msg_log.info('[Ch: {0.channel.name}] [-] {0.author.name}: {0.content}'.format(before))
         msg_log.info('[Ch: {0.channel.name}] [+] {0.author.name}: {0.content}'.format(after))
 
-    @BotModule.event('command_received')
+    @Module.event('command_received')
     async def on_command_received(self, message, command):
         cmd_log.log(26, '[Ch: {0.channel.name}] {0.author.name}: {1.name} - "{0.content}"'.format(message, command))
 
-    @BotModule.event('command_finished')
+    @Module.event('command_finished')
     async def on_command_finished(self, message, command):
         cmd_log.log(27, '[Ch: {0.channel.name}] {0.author.name}: {1}'.format(message, command))
 
-    @BotModule.event('command_notfound')
+    @Module.event('command_notfound')
     async def on_command_notfound(self, message, command):
         cmd_log.log(28, '[Ch: {0.channel.name}] {0.author.name}: {1}'.format(message, command))
 
-    @BotModule.event('command_blocked')
+    @Module.event('command_blocked')
     async def on_command_blocked(self, message, command, e):
         cmd_log.log(29, '[Ch: {0.channel.name}] {0.author.name}: {1.name} - {2}'.format(message, command, e))

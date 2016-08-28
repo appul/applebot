@@ -10,7 +10,7 @@ import aiohttp
 import discord
 from pyquery import PyQuery
 
-from applebot.botmodule import BotModule
+from applebot.module import Module
 from applebot.utils import table_align
 
 PROFILE_URL = 'http://{region}-bns.ncsoft.com/ingame/bs/character/profile?c={name}'
@@ -26,13 +26,13 @@ PROFILE_FORMAT = [
 ]
 
 
-class BnsProfileModule(BotModule):
+class BnsProfileModule(Module):
     def __init__(self):
         super().__init__()
         self.session = BnsClientSession()  # type: BnsClientSession
         self._last_command = 0
 
-    @BotModule.command('profile')
+    @Module.command('profile')
     async def on_profile_command(self, message):
         """`!profile <player name>` | Retrieves a player profile"""
         assert isinstance(message, discord.Message)
