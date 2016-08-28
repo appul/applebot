@@ -96,8 +96,8 @@ class CommandConfig(Config):
 class CommandManager(EventManager):
     def __init__(self):
         super().__init__()
-        self.__dict__['configs'] = {}  # type: Dict[CommandConfig]
-        self.__dict__['_event_type'] = Command
+        self.configs = {}  # type: Dict[CommandConfig]
+        self._event_type = Command
 
     def check(self, command, message):
         config = self.configs.get(str(command)) or self.configs.get('global')
