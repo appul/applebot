@@ -150,10 +150,10 @@ class Event(object):
 
 
 class CombinedEvent(Event):
-    def __init__(self, name, *args):
-        super().__init__(name)
-        self.name = next(iter(args)).name
-        for event in args:
+    def __init__(self, event, *others):
+        super().__init__(event)
+        self.name = event.name
+        for event in others:
             self._absorb(event)
 
     def _absorb(self, event):
