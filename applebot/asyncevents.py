@@ -2,6 +2,7 @@ import inspect
 import logging
 from collections import OrderedDict
 from inspect import Signature
+from typing import Dict
 
 from applebot.exceptions import EventNotFoundError
 
@@ -10,7 +11,7 @@ log = logging.getLogger(__name__)
 
 class EventManager(object):
     def __init__(self):
-        self._events = {}
+        self._events = {}  # type: Dict[str, Event]
         self._event_type = Event
 
     def __contains__(self, event):
@@ -129,10 +130,6 @@ class Event(object):
         """Remove a handler from the event."""
         self._handlers[handler] = None
 
-    def has(self, handler):
-        """Call for membership test."""
-        return handler in self
-
     def clear(self):
         """Remove all the handlers from the event."""
         return self._handlers.clear()
@@ -144,26 +141,6 @@ class Event(object):
     def disable(self):
         """Disable the event."""
         self.enabled = False
-
-    @property
-    def signature(self):
-        return inspect.signature(self)
-
-    @signature.setter
-    def signature(self, signature):
-        self.set_signature(signature)
-
-    def set_signature(self, signature):
-        """Set the signature for the event."""
-        if signature is None:
-            return self.unset_signature()
-        if not isinstance(signature, Signature) and not callable(signature):
-            raise TypeError('Parameter \'signature\' must be callable or of type Signature')
-        self.__signature__ = inspect.signature(signature) if not isinstance(signature, Signature) else signature
-
-    def unset_signature(self):
-        """Unset the signature for the event."""
-        self.__signature__ = None
 
     def combine(self, other):
         """Combine with another event and merge handler into a single list."""
