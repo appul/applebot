@@ -20,9 +20,9 @@ class EventManager(object):
     def __getitem__(self, key) -> Event:
         return self.get(key)
 
-    def __iter__(self):
-        for name, event in self._events.items():
-            yield name, event
+    def __iter__(self) -> Event:
+        for event in self._events.values():
+            yield event
 
     def __len__(self):
         return len(self._events)
