@@ -70,7 +70,7 @@ class CommandConfig(Config):
         if config is not None:
             self.load(config)
 
-    def check(self, message):
+    def check(self, message) -> bool:
         def check(msg, cfg):
             log.debug('Check: {}, {}'.format(msg, cfg))
             if msg is None: return False
@@ -99,7 +99,7 @@ class CommandManager(EventManager):
         self.configs = {}  # type: Dict[str, CommandConfig]
         self._event_type = Command
 
-    def check(self, command, message):
+    def check(self, command, message) -> bool:
         config = self.configs.get(str(command)) or self.configs.get('global')
         if config:
             return config.check(message)
@@ -114,7 +114,7 @@ class Command(Event):
 
     @property
     def help(self) -> str:
-        handler_helps = [str(h.handler.__doc__) for h in self if h.handler.__doc__ is not None]
+        handler_helps = filter(None, [str(h.handler.__doc__) for h in self])
         if handler_helps:
             return '\n'.join(handler_helps)
         return None
@@ -125,6 +125,4 @@ class CombinedCommand(CombinedEvent):
 
 
 class Callback(EventHandler):
-    @property
-    def help(self):
-        return self.handler.__doc__
+    pass
