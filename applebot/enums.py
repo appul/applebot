@@ -5,7 +5,7 @@ from enum import Enum, IntEnum
 from discord import PrivateChannel, Role, User, Message, Server, Channel, Member
 
 from applebot.command import Command
-from applebot.exceptions import BlockCommandException
+from applebot.exceptions import BlockCommandError
 
 
 class EVENTTYPE(IntEnum):
@@ -191,7 +191,7 @@ class EVENT(EventEnumBase):
     command_received = (4, {'command': Command, 'message': Message})
     command_finished = (4, {'command': Command, 'message': Message})
     command_notfound = (4, {'command': Command, 'message': Message})
-    command_blocked = (4, {'command': Command, 'error': BlockCommandException, 'message': Message})
+    command_blocked = (4, {'command': Command, 'error': BlockCommandError, 'message': Message})
 
     http_request_request = (5, {})
     http_get_request = (5, {})
@@ -411,8 +411,8 @@ class EVENT(EventEnumBase):
     def __str__(self):
         return self.name
 
-    async def __call__(self, *args, **kwargs):
-        await self.emit(*args, **kwargs)
+    def __call__(self, *args, **kwargs):
+        self.emit(*args, **kwargs)
 
     async def emit(self, *args, client=None, **kwargs):
         client = client or inspect.currentframe().f_back.f_locals['self'].client

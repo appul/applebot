@@ -7,7 +7,7 @@ import discord
 from applebot.asyncevents import EventManager, Event, EventHandler, CombinedEvent
 from applebot.botmodule import BotModule
 from applebot.config import Config
-from applebot.exceptions import BlockCommandException
+from applebot.exceptions import BlockCommandError
 
 log = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ class CommandModule(BotModule):
     async def emit_command(self, command, message, command_name):
         if command:
             try: await self.client.events.emit('command_received', message, command)
-            except BlockCommandException as e:
+            except BlockCommandError as e:
                 await self.client.events.emit('command_blocked', message, command, e)
             else: await command.emit(message)
         else:
@@ -47,7 +47,7 @@ class CommandModule(BotModule):
     async def on_command_receive(self, message, command):
         # if message.author.id == self.client.config.owner: return
         if not self.client.commands.check(command, message):
-            raise BlockCommandException('denied by command config')
+            raise BlockCommandError('denied by command config')
 
     @BotModule.command('help')
     async def on_help_command(self, message):
