@@ -9,36 +9,18 @@ log = logging.getLogger(__name__)
 
 class EventManager(object):
     def __init__(self):
-        self.__dict__['_events'] = {}
-        self.__dict__['_event_type'] = Event
+        self._events = {}
+        self._event_type = Event
 
     def __contains__(self, event):
         return str(event) in self._events
 
-    def __getattr__(self, key):
-        return self.get(key)
-
     def __getitem__(self, key):
         return self.get(key)
-
-    def __setattr__(self, key, value):
-        return self.set(key, value)
-
-    def __setitem__(self, key, value):
-        return self.set(key, value)
-
-    def __delattr__(self, key):
-        return self.remove(key)
-
-    def __delitem__(self, key):
-        return self.remove(key)
 
     def __iter__(self):
         for name, event in self._events.items():
             yield name, event
-
-    def __dir__(self):
-        return self._events
 
     def __len__(self):
         return len(self._events)
@@ -47,29 +29,11 @@ class EventManager(object):
         """Get an event from the manager."""
         return self._events.get(str(event), default)
 
-    def set(self, key, value):
-        if value is None:
-            return self.remove(key)
-        if key != str(value):
-            raise ValueError('Event name must match the key or attribute name.')
-        if key in self:
-            return self.get(key).merge(value)
-        return self.add_event(value)
-
     def add(self, event, handler=None, call_limit=None):
         """Add a new or existing event or handler to the event manager."""
         if handler is not None:
             return self.add_handler(event, handler, call_limit)
         return self.add_event(event)
-
-    def remove(self, key):
-        """Remove an event and clear its registered handlers."""
-        if key in self:
-            self[key] = self[key].clear()
-
-    def has(self, event):
-        """Call for membership test."""
-        return event in self
 
     async def emit(self, event, *args, **kwargs):
         """Emit an event and call its registered handlers."""
