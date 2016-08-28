@@ -3,7 +3,7 @@ from asyncio import iscoroutinefunction
 
 import discord
 
-from applebot.asyncevents import EventManager
+from applebot.events import EventManager
 from applebot.botmodule import BotModule
 from applebot.config import Config
 from applebot.enums import EVENT

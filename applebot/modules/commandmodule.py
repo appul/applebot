@@ -4,9 +4,9 @@ from typing import Union
 
 import discord
 
-from applebot.asyncevents import EventManager, Event, EventHandler, CombinedEvent
 from applebot.botmodule import BotModule
 from applebot.config import Config
+from applebot.events import EventManager, Event, EventHandler, CombinedEvent
 from applebot.exceptions import BlockCommandError
 
 log = logging.getLogger(__name__)
