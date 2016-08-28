@@ -153,7 +153,6 @@ class CombinedEvent(Event):
     def __init__(self, name, *args):
         super().__init__(name)
         self.name = next(iter(args)).name
-        self._handlers = OrderedDict()
         for event in args:
             self._absorb(event)
 
