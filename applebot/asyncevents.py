@@ -1,8 +1,8 @@
+import asyncio
 import inspect
 import logging
 from collections import OrderedDict
-from inspect import Signature
-from typing import Dict
+from typing import Dict, Union, Any
 
 from applebot.exceptions import EventNotFoundError
 
@@ -17,7 +17,7 @@ class EventManager(object):
     def __contains__(self, event):
         return str(event) in self._events
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> Event:
         return self.get(key)
 
     def __iter__(self):
@@ -27,11 +27,11 @@ class EventManager(object):
     def __len__(self):
         return len(self._events)
 
-    def get(self, event, default=None):
+    def get(self, event, default=None) -> Event:
         """Get an event from the manager."""
         return self._events.get(str(event), default)
 
-    def add(self, event, handler=None, call_limit=None):
+    def add(self, event, handler=None, call_limit=None) -> Union[Event, EventHandler]:
         """Add a new or existing event or handler to the event manager."""
         if handler is not None:
             return self.add_handler(event, handler, call_limit)
@@ -39,9 +39,9 @@ class EventManager(object):
 
     async def emit(self, event, *args, **kwargs):
         """Emit an event and call its registered handlers."""
-        return await self.get(event).emit(*args, **kwargs)
+        await self.get(event).emit(*args, **kwargs)
 
-    def add_event(self, event):
+    def add_event(self, event) -> Event:
         """Add a new or existing event to the event manager."""
         if not isinstance(event, self._event_type) and not isinstance(event, str):
             raise TypeError('Parameter \'event\' must be of type Event or str')
@@ -52,7 +52,7 @@ class EventManager(object):
         self._events[str(event)] = event if isinstance(event, self._event_type) else self._event_type(event)
         return self.get(event)
 
-    def add_handler(self, event, handler, call_limit=None):
+    def add_handler(self, event, handler, call_limit=None) -> EventHandler:
         """Add a new or existing handler to a new or existing event."""
         if event not in self:
             raise EventNotFoundError('Event \'{0}\' doesn\'t exist or hasn\'t been registered to this EventManager.')
@@ -61,16 +61,11 @@ class EventManager(object):
 
 class Event(object):
     def __init__(self, name):
-        self.name = name
-        self.enabled = True
-        self._handlers = OrderedDict()
+        self.name = name  # type: str
+        self.enabled = True  # type: bool
+        self._handlers = OrderedDict()  # type: OrderedDict
         self._handler_type = EventHandler
         self._combined_type = CombinedEvent
-        self.__signature__ = None
-
-    def __call__(self, *args, **kwargs):
-        """Emit and call the handlers of the event."""
-        return self.emit(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -78,7 +73,7 @@ class Event(object):
     def __contains__(self, handler):
         return hash(handler) in self._handlers
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> EventHandler:
         return self.get(key)
 
     def __setitem__(self, key, value):
@@ -87,7 +82,7 @@ class Event(object):
     def __delitem__(self, key):
         return self.remove(key)
 
-    def __iter__(self):
+    def __iter__(self) -> EventHandler:
         for handler in self._handlers.values():
             yield handler
 
@@ -105,7 +100,7 @@ class Event(object):
             for handler in self:
                 await handler.call(*sig.args, **sig.kwargs)
 
-    def get(self, handler, default=None):
+    def get(self, handler, default=None) -> EventHandler:
         """Get a handler from the event."""
         return self._handlers.get(hash(handler), default)
 
@@ -117,7 +112,7 @@ class Event(object):
             raise ValueError('The key must match the assigned handler.')
         return self.add(handler)
 
-    def add(self, handler, call_limit=None):
+    def add(self, handler, call_limit=None) -> EventHandler:
         """Add a handler to the event."""
         if not isinstance(handler, self._handler_type) and not callable(handler):
             raise TypeError('Parameter \'handler\' must be callable or of type EventHandler')
@@ -132,7 +127,7 @@ class Event(object):
 
     def clear(self):
         """Remove all the handlers from the event."""
-        return self._handlers.clear()
+        self._handlers.clear()
 
     def enable(self, enabled=True):
         """Enable or set enabled to value."""
@@ -142,7 +137,7 @@ class Event(object):
         """Disable the event."""
         self.enabled = False
 
-    def combine(self, other):
+    def combine(self, other) -> 'Event':
         """Combine with another event and merge handler into a single list."""
         if other is not self:
             self._combined_type(self, other)
@@ -152,7 +147,7 @@ class Event(object):
 class CombinedEvent(Event):
     def __init__(self, event, *others):
         super().__init__(event)
-        self.name = event.name
+        self.name = event.name  # type: str
         for event in others:
             self._absorb(event)
 
@@ -178,20 +173,16 @@ class CombinedEvent(Event):
 
 class EventHandler(object):
     def __init__(self, handler, call_limit=None):
-        self._handler = None
-        self._enabled = True
-        self.call_limit = call_limit
-        self.handler = handler
-
-    def __call__(self, *args, **kwargs):
-        """Call the handler."""
-        return self.call(*args, **kwargs)
+        self._handler = None  # type: asyncio.coroutine
+        self._enabled = True  # type: bool
+        self.call_limit = call_limit  # type: int
+        self.handler = handler  # type: EventHandler
 
     def __hash__(self):
         """Get a hash by hashing the handler."""
         return hash(self._handler)
 
-    async def call(self, *args, **kwargs):
+    async def call(self, *args, **kwargs) -> Any:
         """Call the handler."""
         if self.enabled:
             if self.call_limit:
@@ -201,7 +192,7 @@ class EventHandler(object):
 
     def limit(self, limit=1):
         """Set a limit for the amount of times this handler will be called."""
-        self.call_limit = limit
+        self.call_limit = int(limit)
 
     def enable(self, value=True):
         """Enable or set enabled to value."""
@@ -212,7 +203,7 @@ class EventHandler(object):
         self.enabled = False
 
     @property
-    def enabled(self):
+    def enabled(self) -> bool:
         """Get enabled status."""
         return self._enabled and (self.call_limit is None or self.call_limit > 0)
 
@@ -222,7 +213,7 @@ class EventHandler(object):
         self._enabled = bool(enabled)
 
     @property
-    def handler(self):
+    def handler(self) -> asyncio.coroutine:
         """Get handler."""
         return self._handler
 
@@ -232,7 +223,3 @@ class EventHandler(object):
         if not callable(handler):
             raise TypeError('Parameter \'handler\' must be callable')
         self._handler = handler
-
-    @property
-    def __signature__(self):
-        return inspect.signature(self.handler)
