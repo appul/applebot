@@ -55,7 +55,7 @@ class EventManager(object):
     def add_handler(self, event, handler, call_limit=None) -> 'EventHandler':
         """Add a new or existing handler to a new or existing event."""
         if event not in self:
-            raise EventNotFoundError('Event \'{0}\' doesn\'t exist or hasn\'t been registered to this EventManager.')
+            raise EventNotFoundError('Event \'{0}\' doesn\'t exist or hasn\'t been registered to this EventManager.'.format(event))
         return self.get(event).add(handler, call_limit)
 
 
