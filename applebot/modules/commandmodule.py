@@ -13,8 +13,8 @@ log = logging.getLogger(__name__)
 
 
 class CommandModule(Module):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, *, client):
+        super().__init__(client=client)
         self._setup_configs()
 
     def _setup_configs(self):

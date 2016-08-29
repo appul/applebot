@@ -27,8 +27,8 @@ PROFILE_FORMAT = [
 
 
 class BnsProfileModule(Module):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, *, client):
+        super().__init__(client=client)
         self.session = BnsClientSession()  # type: BnsClientSession
         self._last_command = 0
 

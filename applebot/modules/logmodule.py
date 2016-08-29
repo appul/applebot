@@ -21,8 +21,8 @@ class DecodedFormatter(logging.Formatter):
 
 
 class LogModule(Module):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, *, client):
+        super().__init__(client=client)
         self.initialize()
 
     def initialize(self):

@@ -9,8 +9,8 @@ log = logging.getLogger(__name__)
 
 
 class DebugModule(Module):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, *, client):
+        super().__init__(client=client)
         assert isinstance(self.client, discord.Client)
 
     @Module.Command()
