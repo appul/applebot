@@ -1,5 +1,4 @@
 import logging
-from types import MethodType
 from typing import Tuple
 
 import discord
@@ -25,8 +24,9 @@ class HandlerDecorator(object):
             for name in self.names:  # type: str
                 event = manager.add(name)  # type: Event
                 event.add(method)
+                print(method)
 
-        setattr(function, '__client_init__', MethodType(client_init, function))
+        setattr(function, '__client_init__', client_init)
         return function
 
 
@@ -39,7 +39,7 @@ class Module(object):
         for name in dir(self):
             method = getattr(self, name, None)
             if '__client_init__' in dir(method):
-                method.__client_init__(self.client)
+                method.__client_init__(method, self.client)
 
     class Event(HandlerDecorator):
         _manager_attribute = 'events'

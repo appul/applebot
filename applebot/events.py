@@ -1,5 +1,4 @@
 import asyncio
-import inspect
 import logging
 from collections import OrderedDict
 from typing import Dict, Union, Any
@@ -96,9 +95,8 @@ class Event(object):
         """Emit and call the handlers of the event."""
         if self.enabled and len(self):
             log.debug('Emitting event: {}'.format(self.name))
-            sig = inspect.signature(self).bind(*args, **kwargs)
             for handler in self:
-                await handler.call(*sig.args, **sig.kwargs)
+                await handler.call(*args, **kwargs)
 
     def get(self, handler, default=None) -> 'EventHandler':
         """Get a handler from the event."""
