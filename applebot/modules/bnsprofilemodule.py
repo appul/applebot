@@ -32,7 +32,7 @@ class BnsProfileModule(Module):
         self.session = BnsClientSession()  # type: BnsClientSession
         self._last_command = 0
 
-    @Module.command('profile')
+    @Module.Command('profile')
     async def on_profile_command(self, message):
         """`!profile <player name>` | Retrieves a player profile"""
         assert isinstance(message, discord.Message)

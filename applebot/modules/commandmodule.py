@@ -22,7 +22,7 @@ class CommandModule(Module):
         for name, config in configs.items():
             self.client.commands.configs[name] = CommandConfig(config)
 
-    @Module.event('message')
+    @Module.Event('message')
     async def parse_message(self, message):
         assert isinstance(message, discord.Message)
         if message.author.bot: return
@@ -43,13 +43,13 @@ class CommandModule(Module):
             await self.client.events.emit('command_notfound', message, command_name)
         await self.client.events.emit('command_finished', message, command or command_name)
 
-    @Module.event('command_received')
+    @Module.Event('command_received')
     async def on_command_receive(self, message, command):
         # if message.author.id == self.client.config.owner: return
         if not self.client.commands.check(command, message):
             raise BlockCommandError('denied by command config')
 
-    @Module.command('help')
+    @Module.Command('help')
     async def on_help_command(self, message):
         """`!help <command>` | Get help for a command."""
         assert isinstance(message, discord.Message)

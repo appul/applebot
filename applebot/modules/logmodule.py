@@ -66,31 +66,31 @@ class LogModule(Module):
         logging.addLevelName(29, 'Blocked')
         cmd_log.addHandler(commands_log)
 
-    @Module.event('message')
+    @Module.Event('message')
     async def on_message(self, message):
         msg_log.info('[Ch: {0.channel.name}] [+] {0.author.name}: {0.content}'.format(message))
 
-    @Module.event('message_delete')
+    @Module.Event('message_delete')
     async def on_message_delete(self, message):
         msg_log.info('[Ch: {0.channel.name}] [-] {0.author.name}: {0.content}'.format(message))
 
-    @Module.event('message_edit')
+    @Module.Event('message_edit')
     async def on_message_edit(self, before, after):
         msg_log.info('[Ch: {0.channel.name}] [-] {0.author.name}: {0.content}'.format(before))
         msg_log.info('[Ch: {0.channel.name}] [+] {0.author.name}: {0.content}'.format(after))
 
-    @Module.event('command_received')
+    @Module.Event('command_received')
     async def on_command_received(self, message, command):
         cmd_log.log(26, '[Ch: {0.channel.name}] {0.author.name}: {1.name} - "{0.content}"'.format(message, command))
 
-    @Module.event('command_finished')
+    @Module.Event('command_finished')
     async def on_command_finished(self, message, command):
         cmd_log.log(27, '[Ch: {0.channel.name}] {0.author.name}: {1}'.format(message, command))
 
-    @Module.event('command_notfound')
+    @Module.Event('command_notfound')
     async def on_command_notfound(self, message, command):
         cmd_log.log(28, '[Ch: {0.channel.name}] {0.author.name}: {1}'.format(message, command))
 
-    @Module.event('command_blocked')
+    @Module.Event('command_blocked')
     async def on_command_blocked(self, message, command, e):
         cmd_log.log(29, '[Ch: {0.channel.name}] {0.author.name}: {1.name} - {2}'.format(message, command, e))
