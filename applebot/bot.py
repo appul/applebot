@@ -8,7 +8,6 @@ from applebot.config import Config
 from applebot.enums import EVENT
 from applebot.events import EventManager
 from applebot.module import Module
-from applebot.modules.commandmodule import CommandManager
 from applebot.utils import call_co
 
 MAX_LOG_SIZE_BYTES = 1024 * 1024
@@ -25,7 +24,7 @@ class Bot(discord.Client):
         super().__init__(**options)
         self.config = BotConfig()
         self.events = EventManager()
-        self.commands = CommandManager()
+        self.commands = EventManager()
         self._modules = {}  # type: Dict[str, Module]
 
     def setup(self, config=None):

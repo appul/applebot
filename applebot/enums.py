@@ -4,8 +4,8 @@ from enum import Enum, IntEnum
 
 from discord import PrivateChannel, Role, User, Message, Server, Channel, Member
 
+from applebot.events import Event
 from applebot.exceptions import BlockCommandError
-from applebot.modules.commandmodule import Command
 
 
 class EVENTTYPE(IntEnum):
@@ -188,10 +188,10 @@ class EVENT(EventEnumBase):
     move_member_response = (3, {'result': (object, None), 'args': tuple, 'kwarg': dict})
     join_voice_channel_response = (3, {'result': (object, None), 'args': tuple, 'kwarg': dict})
 
-    command_received = (4, {'command': Command, 'message': Message})
-    command_finished = (4, {'command': Command, 'message': Message})
-    command_notfound = (4, {'command': Command, 'message': Message})
-    command_blocked = (4, {'command': Command, 'error': BlockCommandError, 'message': Message})
+    command_received = (4, {'command': Event, 'message': Message})
+    command_finished = (4, {'command': Event, 'message': Message})
+    command_notfound = (4, {'command': Event, 'message': Message})
+    command_blocked = (4, {'command': Event, 'error': BlockCommandError, 'message': Message})
 
     http_request_request = (5, {})
     http_get_request = (5, {})

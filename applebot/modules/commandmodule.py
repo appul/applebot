@@ -5,7 +5,6 @@ from typing import Union
 import discord
 
 from applebot.config import Config
-from applebot.events import EventManager, Event, EventHandler, CombinedEvent
 from applebot.exceptions import BlockCommandError
 from applebot.module import Module
 
@@ -15,12 +14,13 @@ log = logging.getLogger(__name__)
 class CommandModule(Module):
     def __init__(self, *, client, events, commands):
         super().__init__(client=client, events=events, commands=commands)
+        self._configs = {}  # type: Dict[str, 'CommandConfig']
         self._setup_configs()
 
     def _setup_configs(self):
-        configs = self.client.config.get('commands', {})
-        for name, config in configs.items():
-            self.commands.configs[name] = CommandConfig(config)
+        config = self.client.config.get('commands', {})
+        for name, config in config.items():
+            self._configs[name] = CommandConfig(config)
 
     @Module.Event('message')
     async def parse_message(self, message):
@@ -46,8 +46,14 @@ class CommandModule(Module):
     @Module.Event('command_received')
     async def on_command_receive(self, message, command):
         # if message.author.id == self.client.config.owner: return
-        if not self.commands.check(command, message):
+        if not self._check_command_config(command, message):
             raise BlockCommandError('denied by command config')
+
+    def _check_command_config(self, command, message) -> bool:
+        config = self._configs.get(str(command)) or self._configs.get('global')
+        if config:
+            return config.check(message)
+        return True
 
     @Module.Command('help')
     async def on_help_command(self, message):
@@ -57,9 +63,18 @@ class CommandModule(Module):
         command = self.commands.get(command_arg)
         if command is None:
             return await self.client.send_message(message.channel, 'Command `{}` does not exist.'.format(command_arg))
-        if command.help is None:
+
+        command_help = self._get_command_help(command)
+        if command_help is None:
             return await self.client.send_message(message.channel, 'Help for command `{}` doesn\'t exist.'.format(command_arg))
-        return await self.client.send_message(message.channel, 'Help for command `{}`:\n{}'.format(command_arg, command.help))
+        return await self.client.send_message(message.channel, 'Help for command `{}`:\n{}'.format(command_arg, command_help))
+
+    @staticmethod
+    def _get_command_help(command) -> str:
+        handler_helps = filter(None, [str(h.handler.__doc__) for h in command])
+        if handler_helps:
+            return '\n'.join(handler_helps)
+        return None
 
 
 class CommandConfig(Config):
@@ -91,38 +106,3 @@ class CommandConfig(Config):
         allow = check(message, self.allow) if self.allow else True
         deny = check(message, self.deny) if self.deny else False
         return allow and not deny
-
-
-class CommandManager(EventManager):
-    def __init__(self):
-        super().__init__()
-        self.configs = {}  # type: Dict[str, CommandConfig]
-        self._event_type = Command
-
-    def check(self, command, message) -> bool:
-        config = self.configs.get(str(command)) or self.configs.get('global')
-        if config:
-            return config.check(message)
-        return True
-
-
-class Command(Event):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._handler_type = Callback
-        self._combined_type = CombinedCommand
-
-    @property
-    def help(self) -> str:
-        handler_helps = filter(None, [str(h.handler.__doc__) for h in self])
-        if handler_helps:
-            return '\n'.join(handler_helps)
-        return None
-
-
-class CombinedCommand(CombinedEvent):
-    pass
-
-
-class Callback(EventHandler):
-    pass
