@@ -30,7 +30,7 @@ class HandlerDecorator(object):
 
 
 class Module(object):
-    def __init__(self, client):
+    def __init__(self, *, client):
         self.__name__ = None  # type: str
         self.client = client  # type: Bot
         self.__register_handlers()
