@@ -4,17 +4,17 @@ from typing import Union
 
 import discord
 
-from applebot.module import Module
 from applebot.config import Config
 from applebot.events import EventManager, Event, EventHandler, CombinedEvent
 from applebot.exceptions import BlockCommandError
+from applebot.module import Module
 
 log = logging.getLogger(__name__)
 
 
 class CommandModule(Module):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._setup_configs()
 
     def _setup_configs(self):
