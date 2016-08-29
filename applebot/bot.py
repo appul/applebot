@@ -40,17 +40,24 @@ class Bot(discord.Client):
                 return super().run(self.config.username, self.config.password)
         return super().run(*args, **kwargs)
 
-    def add(self, module_class):
+    def add(self, module):
         """Add a module to the bot"""
-        if not issubclass(module_class, self._module_base_type):
-            raise TypeError('Parameter \'module\' is not of type {0}'.format(self._module_base_type.__name__))
-        if module_class.__name__ in self._modules:
-            raise LookupError('Module {0.name} has already been added'.format(module_class))
-        log.debug('Adding bot module: {0}'.format(module_class.__name__))
+        if isinstance(module, type):
+            instance = module  # type: Module
+            base = module.__class__
+        else:
+            instance = None
+            base = module
 
-        module = module_class(client=self)
-        module.client_init()
-        self._modules[module_class.__name__] = module
+        log.debug('Adding bot module: {0}'.format(base.__name__))
+        if not issubclass(base, self._module_base_type):
+            raise TypeError('Parameter \'module\' is not of type {0}'.format(self._module_base_type.__name__))
+        if base.__name__ in self._modules:
+            raise LookupError('Module {0.name} has already been added'.format(base))
+
+        instance = instance or base(client=self)
+        instance.client_init()
+        self._modules[base.__name__] = instance
 
     async def emit(self, *args, **kwargs):
         """Emit an event and call its handlers"""
