@@ -17,6 +17,7 @@ LOG_BACKUP_COUNT = 2
 log = logging.getLogger(__name__)
 
 
+# TODO: Remove inheritance with an instance atribute
 class Bot(discord.Client):
     _module_base_type = Module  # Allow child classes to override the module base
 
@@ -55,7 +56,7 @@ class Bot(discord.Client):
         if base.__name__ in self._modules:
             raise LookupError('Module {0.name} has already been added'.format(base))
 
-        instance = instance or base(client=self)
+        instance = instance or base(client=self, events=self.events, commands=self.commands)
         instance.client_init()
         self._modules[base.__name__] = instance
 

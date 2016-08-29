@@ -13,14 +13,14 @@ log = logging.getLogger(__name__)
 
 
 class CommandModule(Module):
-    def __init__(self, *, client):
-        super().__init__(client=client)
+    def __init__(self, *, client, events, commands):
+        super().__init__(client=client, events=events, commands=commands)
         self._setup_configs()
 
     def _setup_configs(self):
         configs = self.client.config.get('commands', {})
         for name, config in configs.items():
-            self.client.commands.configs[name] = CommandConfig(config)
+            self.commands.configs[name] = CommandConfig(config)
 
     @Module.Event('message')
     async def parse_message(self, message):
@@ -28,25 +28,25 @@ class CommandModule(Module):
         if message.author.bot: return
         if message.content[:1] != self.client.config.command_prefix: return
         command_name = message.content[1:].split(' ')[0]
-        command = self.client.commands.get(command_name)
+        command = self.commands.get(command_name)
         log.debug('Received command: {}'.format(command_name))
         await self.emit_command(command, message, command_name)
 
     async def emit_command(self, command, message, command_name):
         if command:
-            try: await self.client.events.emit('command_received', message, command)
+            try: await self.events.emit('command_received', message, command)
             except BlockCommandError as e:
-                await self.client.events.emit('command_blocked', message, command, e)
+                await self.events.emit('command_blocked', message, command, e)
             else: await command.emit(message)
         else:
             log.debug('Command not registered')
-            await self.client.events.emit('command_notfound', message, command_name)
-        await self.client.events.emit('command_finished', message, command or command_name)
+            await self.events.emit('command_notfound', message, command_name)
+        await self.events.emit('command_finished', message, command or command_name)
 
     @Module.Event('command_received')
     async def on_command_receive(self, message, command):
         # if message.author.id == self.client.config.owner: return
-        if not self.client.commands.check(command, message):
+        if not self.commands.check(command, message):
             raise BlockCommandError('denied by command config')
 
     @Module.Command('help')
@@ -54,7 +54,7 @@ class CommandModule(Module):
         """`!help <command>` | Get help for a command."""
         assert isinstance(message, discord.Message)
         command_arg = message.content[6:] or 'help'
-        command = self.client.commands.get(command_arg)
+        command = self.commands.get(command_arg)
         if command is None:
             return await self.client.send_message(message.channel, 'Command `{}` does not exist.'.format(command_arg))
         if command.help is None:

@@ -5,6 +5,7 @@ import discord
 
 from applebot.events import Event
 from applebot.events import EventManager
+from applebot.modules.commandmodule import CommandManager
 
 log = logging.getLogger(__name__)
 
@@ -31,9 +32,11 @@ class HandlerDecorator(object):
 
 
 class Module(object):
-    def __init__(self, *, client):
+    def __init__(self, *, client, events, commands):
         self.__name__ = None  # type: str
         self.client = client  # type: discord.Client
+        self.events = events  # type: EventManager
+        self.commands = commands  # type: CommandManager
 
     def client_init(self):
         for name in dir(self):
