@@ -8,8 +8,7 @@ from applebot.config import Config
 from applebot.enums import EVENT
 from applebot.events import EventManager
 from applebot.module import Module
-from applebot.modules.commandmodule import CommandManager, CommandModule
-from applebot.modules.logmodule import LogModule
+from applebot.modules.commandmodule import CommandManager
 from applebot.utils import call_co
 
 MAX_LOG_SIZE_BYTES = 1024 * 1024
@@ -31,8 +30,6 @@ class Bot(discord.Client):
 
     def initialize(self):
         self._setup_events()
-        self.add(LogModule)
-        self.add(CommandModule)
 
     def run(self, *args, **kwargs):
         """Run it! Start the bot"""

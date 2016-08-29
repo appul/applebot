@@ -1,10 +1,12 @@
 from applebot.bot import Bot
-from applebot.modules.debugmodule import DebugModule
+from applebot.modules.commandmodule import CommandModule
+from applebot.modules.logmodule import LogModule
 
 
 def run():
     bot = Bot(config='example')
-    bot.add(DebugModule)
+    bot.add(LogModule)
+    bot.add(CommandModule)
     bot.run()
     return bot
 
