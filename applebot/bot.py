@@ -43,11 +43,11 @@ class Bot(discord.Client):
     def add(self, module):
         """Add a module to the bot"""
         if isinstance(module, type):
-            instance = module  # type: Module
-            base = module.__class__
-        else:
             instance = None
             base = module
+        else:
+            instance = module  # type: Module
+            base = module.__class__
 
         log.debug('Adding bot module: {0}'.format(base.__name__))
         if not issubclass(base, self._module_base_type):

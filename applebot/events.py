@@ -17,21 +17,21 @@ class EventManager(object):
     def __contains__(self, event):
         return str(event) in self._events
 
-    def __getitem__(self, key) -> Event:
+    def __getitem__(self, key) -> 'Event':
         return self.get(key)
 
-    def __iter__(self) -> Event:
+    def __iter__(self) -> 'Event':
         for event in self._events.values():
             yield event
 
     def __len__(self):
         return len(self._events)
 
-    def get(self, event, default=None) -> Event:
+    def get(self, event, default=None) -> 'Event':
         """Get an event from the manager."""
         return self._events.get(str(event), default)
 
-    def add(self, event, handler=None, call_limit=None) -> Union[Event, EventHandler]:
+    def add(self, event, handler=None, call_limit=None) -> Union['Event', 'EventHandler']:
         """Add a new or existing event or handler to the event manager."""
         if handler is not None:
             return self.add_handler(event, handler, call_limit)
@@ -41,7 +41,7 @@ class EventManager(object):
         """Emit an event and call its registered handlers."""
         await self.get(event).emit(*args, **kwargs)
 
-    def add_event(self, event) -> Event:
+    def add_event(self, event) -> 'Event':
         """Add a new or existing event to the event manager."""
         if not isinstance(event, self._event_type) and not isinstance(event, str):
             raise TypeError('Parameter \'event\' must be of type Event or str')
@@ -52,7 +52,7 @@ class EventManager(object):
         self._events[str(event)] = event if isinstance(event, self._event_type) else self._event_type(event)
         return self.get(event)
 
-    def add_handler(self, event, handler, call_limit=None) -> EventHandler:
+    def add_handler(self, event, handler, call_limit=None) -> 'EventHandler':
         """Add a new or existing handler to a new or existing event."""
         if event not in self:
             raise EventNotFoundError('Event \'{0}\' doesn\'t exist or hasn\'t been registered to this EventManager.')
@@ -73,7 +73,7 @@ class Event(object):
     def __contains__(self, handler):
         return hash(handler) in self._handlers
 
-    def __getitem__(self, key) -> EventHandler:
+    def __getitem__(self, key) -> 'EventHandler':
         return self.get(key)
 
     def __setitem__(self, key, value):
@@ -82,7 +82,7 @@ class Event(object):
     def __delitem__(self, key):
         return self.remove(key)
 
-    def __iter__(self) -> EventHandler:
+    def __iter__(self) -> 'EventHandler':
         for handler in self._handlers.values():
             yield handler
 
@@ -100,7 +100,7 @@ class Event(object):
             for handler in self:
                 await handler.call(*sig.args, **sig.kwargs)
 
-    def get(self, handler, default=None) -> EventHandler:
+    def get(self, handler, default=None) -> 'EventHandler':
         """Get a handler from the event."""
         return self._handlers.get(hash(handler), default)
 
@@ -112,7 +112,7 @@ class Event(object):
             raise ValueError('The key must match the assigned handler.')
         return self.add(handler)
 
-    def add(self, handler, call_limit=None) -> EventHandler:
+    def add(self, handler, call_limit=None) -> 'EventHandler':
         """Add a handler to the event."""
         if not isinstance(handler, self._handler_type) and not callable(handler):
             raise TypeError('Parameter \'handler\' must be callable or of type EventHandler')

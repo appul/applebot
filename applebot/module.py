@@ -2,7 +2,8 @@ import logging
 from types import MethodType
 from typing import Tuple
 
-from applebot.bot import Bot
+import discord
+
 from applebot.events import Event
 from applebot.events import EventManager
 
@@ -32,7 +33,7 @@ class HandlerDecorator(object):
 class Module(object):
     def __init__(self, *, client):
         self.__name__ = None  # type: str
-        self.client = client  # type: Bot
+        self.client = client  # type: discord.Client
         self.__register_handlers()
 
     def __register_handlers(self):
