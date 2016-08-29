@@ -39,7 +39,7 @@ class Module(object):
         for name in dir(self):
             method = getattr(self, name, None)
             if '__client_init__' in dir(method):
-                method.__client_init__()
+                method.__client_init__(self.client)
 
     class Event(HandlerDecorator):
         _manager_attribute = 'events'
