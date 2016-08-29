@@ -1,12 +1,13 @@
 import logging
 from asyncio import iscoroutinefunction
+from typing import Dict
 
 import discord
 
-from applebot.events import EventManager
-from applebot.module import Module
 from applebot.config import Config
 from applebot.enums import EVENT
+from applebot.events import EventManager
+from applebot.module import Module
 from applebot.modules.commandmodule import CommandManager, CommandModule
 from applebot.modules.logmodule import LogModule
 from applebot.utils import call_co
@@ -18,15 +19,14 @@ log = logging.getLogger(__name__)
 
 
 class Bot(discord.Client):
-    _module_base = Module  # Allow child classes to override the module base
+    _module_base_type = Module  # Allow child classes to override the module base
 
     def __init__(self, *, config=None, **options):
         super().__init__(**options)
-        self.client = self
         self.config = BotConfig(config)
         self.events = EventManager()
         self.commands = CommandManager()
-        self._bot_modules = {}
+        self._bot_modules = {}  # type: Dict[str, Module]
         self.initialize()
 
     def initialize(self):
@@ -43,14 +43,17 @@ class Bot(discord.Client):
                 return super().run(self.config.username, self.config.password)
         return super().run(*args, **kwargs)
 
-    def add(self, bot_module):
+    def add(self, module_class):
         """Add a module to the bot"""
-        if not issubclass(bot_module, self._module_base):
-            raise TypeError('Parameter \'module\' is not of type {0}'.format(self._module_base.__name__))
-        if bot_module.__name__ in self._bot_modules:
-            raise LookupError('Module {0.name} has already been added'.format(bot_module))
-        log.debug('Adding bot module: {0}'.format(bot_module.__name__))
-        self._bot_modules[bot_module.__name__] = bot_module()
+        if not issubclass(module_class, self._module_base_type):
+            raise TypeError('Parameter \'module\' is not of type {0}'.format(self._module_base_type.__name__))
+        if module_class.__name__ in self._bot_modules:
+            raise LookupError('Module {0.name} has already been added'.format(module_class))
+        log.debug('Adding bot module: {0}'.format(module_class.__name__))
+
+        module = module_class(client=self)
+        module.client_init()
+        self._bot_modules[module_class.__name__] = module
 
     async def emit(self, *args, **kwargs):
         """Emit an event and call its handlers"""
