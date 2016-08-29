@@ -4,7 +4,8 @@ from applebot.modules.logmodule import LogModule
 
 
 def run():
-    bot = Bot(config='example')
+    bot = Bot()
+    bot.setup(config='example')
     bot.add(LogModule)
     bot.add(CommandModule)
     bot.run()

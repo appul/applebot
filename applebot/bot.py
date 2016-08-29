@@ -20,15 +20,15 @@ log = logging.getLogger(__name__)
 class Bot(discord.Client):
     _module_base_type = Module  # Allow child classes to override the module base
 
-    def __init__(self, *, config=None, **options):
+    def __init__(self, **options):
         super().__init__(**options)
-        self.config = BotConfig(config)
+        self.config = BotConfig()
         self.events = EventManager()
         self.commands = CommandManager()
-        self._bot_modules = {}  # type: Dict[str, Module]
-        self.initialize()
+        self._modules = {}  # type: Dict[str, Module]
 
-    def initialize(self):
+    def setup(self, config=None):
+        self.config.load(config)
         self._setup_events()
 
     def run(self, *args, **kwargs):
@@ -44,13 +44,13 @@ class Bot(discord.Client):
         """Add a module to the bot"""
         if not issubclass(module_class, self._module_base_type):
             raise TypeError('Parameter \'module\' is not of type {0}'.format(self._module_base_type.__name__))
-        if module_class.__name__ in self._bot_modules:
+        if module_class.__name__ in self._modules:
             raise LookupError('Module {0.name} has already been added'.format(module_class))
         log.debug('Adding bot module: {0}'.format(module_class.__name__))
 
         module = module_class(client=self)
         module.client_init()
-        self._bot_modules[module_class.__name__] = module
+        self._modules[module_class.__name__] = module
 
     async def emit(self, *args, **kwargs):
         """Emit an event and call its handlers"""
