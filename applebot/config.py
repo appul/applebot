@@ -11,7 +11,7 @@ class Config(object):
         if config:
             self.load(config)
 
-    def get(self, key, default):
+    def get(self, key, default=None):
         return self.__dict__.get(key, default)
 
     def sub(self, name, config_type=None, default_value=None):
