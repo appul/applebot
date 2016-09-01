@@ -95,8 +95,8 @@ class Bot(object):
                     self.events.add(str(event))
                     if event.type == EVENT.TYPE.IN:
                         self._attach_emitter(str(event))
-                else:
-                    self._hook_method(self.http, str(event)[5:], 'http_{m}_request', 'http_{m}_request')
+                        # else:
+                        #     self._hook_method(self.client.http, str(event)[5:], 'http_{m}_request', 'http_{m}_request')
             else:
                 self._hook_method(self.client, str(event))
 
