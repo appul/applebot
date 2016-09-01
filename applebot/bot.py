@@ -80,15 +80,16 @@ class Bot(object):
 
         return method_decorator
 
-    async def on_error(self, *args, **kwargs):
-        log.error(*args, **kwargs)
-        await self.events.emit('error', *args, **kwargs)
-        await self.client.on_error(*args, **kwargs)
-
     #########
     # setup #
     #########
     def _setup_events(self):
+        async def on_error(*args, **kwargs):
+            log.error(*args, **kwargs)
+            await self.events.emit('error', *args, **kwargs)
+            await self.client.on_error(*args, **kwargs)
+
+        self._attach_emitter('error', on_error)
         for event in EVENT:
             if event.type > EVENT.TYPE.NONE:
                 if event.type < EVENT.TYPE.HTTP_METHOD:
@@ -100,10 +101,12 @@ class Bot(object):
             else:
                 self._hook_method(self.client, str(event))
 
-    def _attach_emitter(self, event):
+    def _attach_emitter(self, event, function=None):
         async def emitter(*args, **kwargs):
             await self.events.emit(event, *args, **kwargs)
 
+        if function is not None:
+            emitter = function
         emitter.__name__ = 'on_{}'.format(event)
         self.client.event(emitter)
 
