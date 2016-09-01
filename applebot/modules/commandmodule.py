@@ -12,21 +12,22 @@ log = logging.getLogger(__name__)
 
 
 class CommandModule(Module):
-    def __init__(self, *, client, events, commands):
-        super().__init__(client=client, events=events, commands=commands)
+    def __init__(self, prefix='!', *, client, events, commands, config):
+        super().__init__(client=client, events=events, commands=commands, config=config)
+        self.prefix = prefix
         self._configs = {}  # type: Dict[str, 'CommandConfig']
         self._setup_configs()
 
     def _setup_configs(self):
-        config = self.client.config.get('commands', {})
-        for name, config in config.items():
-            self._configs[name] = CommandConfig(config)
+        if self.config:
+            for name, config in self.config.items():
+                self._configs[name] = CommandConfig(config)
 
     @Module.Event('message')
     async def parse_message(self, message):
         assert isinstance(message, discord.Message)
         if message.author.bot: return
-        if message.content[:1] != self.client.config.command_prefix: return
+        if message.content[:1] != self.prefix: return
         command_name = message.content[1:].split(' ')[0]
         command = self.commands.get(command_name)
         log.debug('Received command: {}'.format(command_name))

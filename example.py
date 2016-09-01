@@ -6,8 +6,8 @@ from applebot.modules.logmodule import LogModule
 def run():
     bot = Bot()
     bot.setup(config='example')
-    bot.add(LogModule)
-    bot.add(CommandModule)
+    bot.add(LogModule, debug=False)
+    bot.add(CommandModule, prefix='!')
     bot.run()
     return bot
 

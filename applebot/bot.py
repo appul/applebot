@@ -17,12 +17,12 @@ log = logging.getLogger(__name__)
 
 
 # TODO: Remove inheritance with an instance atribute
-class Bot(discord.Client):
+class Bot(object):
     _module_base_type = Module  # Allow child classes to override the module base
 
     def __init__(self, **options):
-        super().__init__(**options)
         self.config = BotConfig()
+        self.client = discord.Client(**options)
         self.events = EventManager()
         self.commands = EventManager()
         self._modules = {}  # type: Dict[str, Module]
@@ -35,12 +35,12 @@ class Bot(discord.Client):
         """Run it! Start the bot"""
         if not args and not kwargs:
             if self.config.token:
-                return super().run(self.config.token)
+                return self.client.run(self.config.token)
             if self.config.username and self.config.password:
-                return super().run(self.config.username, self.config.password)
-        return super().run(*args, **kwargs)
+                return self.client.run(self.config.username, self.config.password)
+        return self.client.run(*args, **kwargs)
 
-    def add(self, module):
+    def add(self, module, **module_args):
         """Add a module to the bot"""
         if isinstance(module, type):
             instance = None
@@ -55,9 +55,13 @@ class Bot(discord.Client):
         if base.__name__ in self._modules:
             raise LookupError('Module {0.name} has already been added'.format(base))
 
-        instance = instance or base(client=self, events=self.events, commands=self.commands)
+        instance = instance or self._init_module(base, module_args)
         instance.client_init()
         self._modules[base.__name__] = instance
+
+    def _init_module(self, base, module_args):
+        config = self.config.get(base.__name__.lower())
+        return base(client=self.client, events=self.events, commands=self.commands, config=config, **module_args)
 
     async def emit(self, *args, **kwargs):
         """Emit an event and call its handlers"""
@@ -79,7 +83,7 @@ class Bot(discord.Client):
     async def on_error(self, *args, **kwargs):
         log.error(*args, **kwargs)
         await self.events.emit('error', *args, **kwargs)
-        await super().on_error(*args, **kwargs)
+        await self.client.on_error(*args, **kwargs)
 
     #########
     # setup #
@@ -94,14 +98,14 @@ class Bot(discord.Client):
                 else:
                     self._hook_method(self.http, str(event)[5:], 'http_{m}_request', 'http_{m}_request')
             else:
-                self._hook_method(self, str(event))
+                self._hook_method(self.client, str(event))
 
     def _attach_emitter(self, event):
         async def emitter(*args, **kwargs):
             await self.events.emit(event, *args, **kwargs)
 
         emitter.__name__ = 'on_{}'.format(event)
-        self.event(emitter)
+        self.client.event(emitter)
 
     def _hook_method(self, obj, method_name, event_before='{m}_request', event_after='{m}_response'):
         """Hook a method with before and after events."""

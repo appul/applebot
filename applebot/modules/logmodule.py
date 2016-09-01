@@ -21,8 +21,9 @@ class DecodedFormatter(logging.Formatter):
 
 
 class LogModule(Module):
-    def __init__(self, *, client, events, commands):
-        super().__init__(client=client, events=events, commands=commands)
+    def __init__(self, debug=False, *, client, events, commands, config):
+        super().__init__(client=client, events=events, commands=commands, config=config)
+        self.debug = debug
         self.initialize()
 
     def initialize(self):
@@ -34,7 +35,7 @@ class LogModule(Module):
 
         cli_log = logging.StreamHandler()
         cli_log.setFormatter(log_formatter)
-        cli_log.setLevel(logging.DEBUG if self.client.config.debug else logging.INFO)
+        cli_log.setLevel(logging.DEBUG if self.debug else logging.INFO)
 
         file_log = RotatingFileHandler(os.path.join(log_dir, 'log.log'), backupCount=LOG_BACKUP_COUNT, maxBytes=MAX_LOG_SIZE_BYTES, encoding='utf-8')
         file_log.setFormatter(log_formatter)
