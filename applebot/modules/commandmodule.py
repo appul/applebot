@@ -35,10 +35,12 @@ class CommandModule(Module):
 
     async def emit_command(self, command, message, command_name):
         if command:
-            try: await self.events.emit('command_received', message, command)
+            try:
+                await self.events.emit('command_received', message, command)
             except BlockCommandError as e:
                 await self.events.emit('command_blocked', message, command, e)
-            else: await command.emit(message)
+            else:
+                await command.emit(message)
         else:
             log.debug('Command not registered')
             await self.events.emit('command_notfound', message, command_name)
@@ -67,8 +69,10 @@ class CommandModule(Module):
 
         command_help = self._get_command_help(command)
         if command_help is None:
-            return await self.client.send_message(message.channel, 'Help for command `{}` doesn\'t exist.'.format(command_arg))
-        return await self.client.send_message(message.channel, 'Help for command `{}`:\n{}'.format(command_arg, command_help))
+            return await self.client.send_message(message.channel,
+                                                  'Help for command `{}` doesn\'t exist.'.format(command_arg))
+        return await self.client.send_message(message.channel,
+                                              'Help for command `{}`:\n{}'.format(command_arg, command_help))
 
     @staticmethod
     def _get_command_help(command) -> str:
@@ -83,6 +87,7 @@ class CommandConfig(Config):
         super().__init__()
         self.allow = {}  # type: Dict[str, Union[str, int, dict, list]]
         self.deny = {}  # type: Dict[str, Union[str, int, dict, list]]
+        self.blacklist = {}  # type: Dict[str, Union[str, int, dict, list]]
         if config is not None:
             self.load(config)
 
@@ -106,4 +111,12 @@ class CommandConfig(Config):
 
         allow = check(message, self.allow) if self.allow else True
         deny = check(message, self.deny) if self.deny else False
-        return allow and not deny
+        blacklist = check(message, self.blacklist) if self.blacklist else False
+
+        if blacklist:
+            return False
+        if allow:
+            return True
+        if deny:
+            return False
+        return True
