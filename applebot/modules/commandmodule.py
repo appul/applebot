@@ -1,5 +1,5 @@
 import logging
-from typing import Dict
+from typing import Dict, Optional
 from typing import Union
 
 import discord
@@ -75,7 +75,7 @@ class CommandModule(Module):
                                               'Help for command `{}`:\n{}'.format(command_arg, command_help))
 
     @staticmethod
-    def _get_command_help(command) -> str:
+    def _get_command_help(command) -> Optional[str]:
         handler_helps = filter(None, [str(h.handler.__doc__) for h in command])
         if handler_helps:
             return '\n'.join(handler_helps)
